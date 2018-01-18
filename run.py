@@ -41,7 +41,7 @@ class Log:
     write = WriteText
 
 
-class RunDemoApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
+class RunApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
     def __init__(self, name, module, useShell):
         self.name = name
         self.demoModule = module
@@ -115,6 +115,7 @@ class RunDemoApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
                 if shell:
                     shell.Close()
                 evt.Skip()
+
             frame.Bind(wx.EVT_CLOSE, CloseShell)
 
         return True
@@ -148,18 +149,15 @@ def main(argv):
         print("Please specify a demo module name on the command-line")
         raise SystemExit
 
-    # ensure the CWD is the demo folder
-    demoFolder = os.path.realpath(os.path.dirname(__file__))
-    os.chdir(demoFolder)
+    # ensure the CWD is the wxticker folder
+    wxTickerFolder = os.path.realpath(os.path.dirname(__file__))
+    os.chdir(wxTickerFolder)
 
     name, ext  = os.path.splitext(argv[1])
     module = __import__(name)
 
-
-    app = RunDemoApp(name, module, useShell)
+    app = RunApp(name, module, useShell)
     app.MainLoop()
-
-
 
 if __name__ == "__main__":
     main(sys.argv)

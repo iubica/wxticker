@@ -132,5 +132,6 @@ def runTest(frame, nb, log):
 if __name__ == '__main__':
     import sys,os
     import wxticker.run
+    
     wxticker.run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
 
