@@ -37,7 +37,10 @@ def GetHoldings():
     if not tickerscrape_home:
         if os.name == "posix":
             tickerscrape_home = "/opt/tickerscrape"
+        elif os.name == "nt":
+            tickerscrape_home = os.environ["APPDATA"] + "\\tickerscrape"
 
+    print (tickerscrape_home)
 
 class TestListCtrl(wx.ListCtrl,
                    listmix.ListCtrlAutoWidthMixin,
