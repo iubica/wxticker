@@ -12,19 +12,13 @@
 #----------------------------------------------------------------------------
 
 import os, sys
+import csv
 import wx
 import wx.lib.mixins.listctrl as listmix
 
 #---------------------------------------------------------------------------
 
-_listctrldata = {
-1 : ("SPY", "", ""),
-2 : ("FUSEX", "", ""),
-3 : ("in", "a", "cell"),
-4 : ("See how the length columns", "change", "?"),
-5 : ("You can use", "TAB,", "cursor down,"),
-6 : ("and cursor up", "to", "navigate"),
-}
+_tickers = []
 
 #---------------------------------------------------------------------------
 
@@ -32,6 +26,7 @@ def GetHoldings():
     tickerscrape_env = "TICKERSCRAPE_HOME"
     tickerscrape_home = None
 
+    # Get the home directory of the application
     if tickerscrape_env in os.environ:
         tickerscrape_home = os.environ[tickerscrape_env]
     if not tickerscrape_home:
@@ -39,8 +34,33 @@ def GetHoldings():
             tickerscrape_home = "/opt/tickerscrape"
         elif os.name == "nt":
             tickerscrape_home = os.environ["APPDATA"] + "\\tickerscrape"
+            
+    try:
+        os.stat(tickerscrape_home)
+    except:
+        try:
+            os.mkdir(tickerscrape_home)
+        except IOError as e:
+            print(e)
+            return None
 
-    print (tickerscrape_home)
+    try:
+        f = open(tickerscrape_home + "/tickers.csv", 'a+')
+    except IOError as e:
+        print(e)
+        return None
+    
+    #print("Reading file %s" % (tickerscrape_home + "/tickers.csv"))
+
+    f.seek(0)
+
+    f_reader = csv.reader(f, delimiter=',')
+    for row in f_reader:
+        _tickers.append(row)
+
+    #print(_tickers)
+
+    f.close()
 
 class TestListCtrl(wx.ListCtrl,
                    listmix.ListCtrlAutoWidthMixin,
@@ -68,16 +88,19 @@ class TestListCtrl(wx.ListCtrl,
         self.InsertColumn(6, "Len 2", wx.LIST_FORMAT_RIGHT)
         self.InsertColumn(7, "Len 3", wx.LIST_FORMAT_RIGHT)
 
-        items = _listctrldata.items()
-        for key, data in items:
-            index = self.InsertItem(self.GetItemCount(), data[0])
-            self.SetItem(index, 1, data[1])
-            self.SetItem(index, 2, data[2])
+        for key, value in enumerate(_tickers):
+            index = self.InsertItem(self.GetItemCount(), value[0])
+            self.SetItem(index, 2, value[1] if len(value) > 1 else "")
+            self.SetItem(index, 3, value[2] if len(value) > 2 else "")
+            self.SetItem(index, 4, value[3] if len(value) > 3 else "")
+            self.SetItem(index, 5, value[4] if len(value) > 4 else "")
             self.SetItemData(index, key)
-
+            
         self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         self.SetColumnWidth(1, wx.LIST_AUTOSIZE)
-        self.SetColumnWidth(2, 100)
+        self.SetColumnWidth(2, wx.LIST_AUTOSIZE)
+        self.SetColumnWidth(3, wx.LIST_AUTOSIZE)
+        self.SetColumnWidth(4, wx.LIST_AUTOSIZE)
 
         self.currentItem = 0
 
