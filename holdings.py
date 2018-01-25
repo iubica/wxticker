@@ -11,13 +11,13 @@
 # Licence:      wxWindows license
 #----------------------------------------------------------------------------
 
-import sys
+import os, sys
 import wx
 import wx.lib.mixins.listctrl as listmix
 
 #---------------------------------------------------------------------------
 
-listctrldata = {
+_listctrldata = {
 1 : ("SPY", "", ""),
 2 : ("FUSEX", "", ""),
 3 : ("in", "a", "cell"),
@@ -27,6 +27,17 @@ listctrldata = {
 }
 
 #---------------------------------------------------------------------------
+
+def GetHoldings():
+    tickerscrape_env = "TICKERSCRAPE_HOME"
+    tickerscrape_home = None
+
+    if tickerscrape_env in os.environ:
+        tickerscrape_home = os.environ[tickerscrape_env]
+    if not tickerscrape_home:
+        if os.name == "posix":
+            tickerscrape_home = "/opt/tickerscrape"
+
 
 class TestListCtrl(wx.ListCtrl,
                    listmix.ListCtrlAutoWidthMixin,
@@ -42,6 +53,8 @@ class TestListCtrl(wx.ListCtrl,
 
 
     def Populate(self):
+        GetHoldings()
+        
         # for normal, simple columns, you can add them like this:
         self.InsertColumn(0, "Ticker")
         self.InsertColumn(1, "Name")
@@ -52,7 +65,7 @@ class TestListCtrl(wx.ListCtrl,
         self.InsertColumn(6, "Len 2", wx.LIST_FORMAT_RIGHT)
         self.InsertColumn(7, "Len 3", wx.LIST_FORMAT_RIGHT)
 
-        items = listctrldata.items()
+        items = _listctrldata.items()
         for key, data in items:
             index = self.InsertItem(self.GetItemCount(), data[0])
             self.SetItem(index, 1, data[1])
