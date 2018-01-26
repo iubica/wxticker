@@ -19,7 +19,6 @@ import pandas as pd
 
 #---------------------------------------------------------------------------
 
-_tickers = []
 _tickers_df = None
 
 #---------------------------------------------------------------------------
@@ -45,24 +44,6 @@ def GetHoldings():
         except IOError as e:
             print(e)
             return None
-
-    try:
-        f = open(tickerscrape_home + "/tickers.csv", 'a+')
-    except IOError as e:
-        print(e)
-        return None
-    
-    #print("Reading file %s" % (tickerscrape_home + "/tickers.csv"))
-
-    f.seek(0)
-
-    f_reader = csv.reader(f, delimiter=',')
-    for row in f_reader:
-        _tickers.append(row)
-
-    #print(_tickers)
-
-    f.close()
 
     # Get the holdings table
     global _tickers_df
@@ -90,9 +71,6 @@ class TestListCtrl(wx.ListCtrl,
 
     def Populate(self):
         GetHoldings()
-        
-        print(_tickers_df)
-    
         
         # for normal, simple columns, you can add them like this:
         self.InsertColumn(0, "Ticker")
