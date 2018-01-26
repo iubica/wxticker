@@ -15,10 +15,12 @@ import os, sys
 import csv
 import wx
 import wx.lib.mixins.listctrl as listmix
+import pandas as pd
 
 #---------------------------------------------------------------------------
 
 _tickers = []
+_tickers_df = None
 
 #---------------------------------------------------------------------------
 
@@ -62,6 +64,17 @@ def GetHoldings():
 
     f.close()
 
+    # Get the holdings table
+    global _tickers_df
+    _tickers_df = pd.read_csv(tickerscrape_home + "/tickers.csv")
+    _tickers_df.fillna("", inplace=True)
+    print(_tickers_df)
+    
+    # Save the holdings table
+    df = _tickers_df.set_index("Ticker", inplace=False)
+    df.to_csv(tickerscrape_home + "/tickers_out.csv")
+    
+
 class TestListCtrl(wx.ListCtrl,
                    listmix.ListCtrlAutoWidthMixin,
                    listmix.TextEditMixin):
@@ -78,6 +91,9 @@ class TestListCtrl(wx.ListCtrl,
     def Populate(self):
         GetHoldings()
         
+        print(_tickers_df)
+    
+        
         # for normal, simple columns, you can add them like this:
         self.InsertColumn(0, "Ticker")
         self.InsertColumn(1, "Name")
@@ -88,14 +104,13 @@ class TestListCtrl(wx.ListCtrl,
         self.InsertColumn(6, "Len 2", wx.LIST_FORMAT_RIGHT)
         self.InsertColumn(7, "Len 3", wx.LIST_FORMAT_RIGHT)
 
-        for key, value in enumerate(_tickers):
-            index = self.InsertItem(self.GetItemCount(), value[0])
-            self.SetItem(index, 2, value[1] if len(value) > 1 else "")
-            self.SetItem(index, 3, value[2] if len(value) > 2 else "")
-            self.SetItem(index, 4, value[3] if len(value) > 3 else "")
-            self.SetItem(index, 5, value[4] if len(value) > 4 else "")
+        for key, row in _tickers_df.iterrows():
+            index = self.InsertItem(self.GetItemCount(), row["Ticker"])
+            self.SetItem(index, 2, str(row["Shares"]))
+            self.SetItem(index, 3, str(row["Cost Basis"]))
+            self.SetItem(index, 4, str(row["Purchase Date"]))
             self.SetItemData(index, key)
-            
+
         self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         self.SetColumnWidth(1, wx.LIST_AUTOSIZE)
         self.SetColumnWidth(2, wx.LIST_AUTOSIZE)
